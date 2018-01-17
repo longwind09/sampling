@@ -1,0 +1,45 @@
+#! 文件编码要求UTF-8.
+label=action_2
+#! 样本
+sample=label>0
+convert={"SSactions":{"type":"HiveConvert","param":"k=1,2,3,4,5,6,7&o=action_1,action_2,action_3,action_4,action_5,action_6,action_7&v=0,0,0,0,0,0,0"}}
+#! 输出字段,sample:正负样本,label:打分
+out=sample
+#! 正样本
+filter_1_type=ClassFilter
+filter_1_param=sample=true
+#! 正样本取反样本
+filter_not_1_type=NotFilter
+filter_not_1_param=filter_1
+
+#! 点击样本
+filter_el_1_type=ELFilter
+filter_el_1_param="true".equals(clicked)
+#! 点击负样本
+filter_click1_0_type=AndFilter
+filter_click1_0_param=filters=filter_not_1,filter_el_1
+#! 点击比率2
+filter_ratio_click1_type=RatioFilter
+filter_ratio_click1_param=filterBaseId=filter_click1_0&filterNumId=filter_1&ratio=2
+
+#! 非点击样本
+filter_el_0_type=ELFilter
+filter_el_0_param="false".equals(clicked)
+#! 非点击负样本
+filter_click0_0_type=AndFilter
+filter_click0_0_param=filters=filter_not_1,filter_el_0
+#! 非点击比率4
+filter_ratio_click0_type=RatioFilter
+filter_ratio_click0_param=filterBaseId=filter_click0_0&filterNumId=filter_1&ratio=4
+
+#! 负样本点击类型
+filter_0_type=OrFilter
+filter_0_param=filter_ratio_click0,filter_ratio_click1
+
+
+# 保留字段,筛选样本的过滤器根
+filter_root_type=OrFilter
+filter_root_param=filter_1,filter_0
+# 保留字段,样本挑选前的预处理,比如过滤精选
+filter_pre_type=ELFilter
+filter_pre_param="ordinary"==infotype
